@@ -357,6 +357,7 @@ struct Network
     };
 
     struct Bandwidth { int64_t bitsPerSecond; };
+    struct BandwidthShort { int64_t bitsPerSecond; };
 
     std::map<Name, Interface> interfaces;
 
@@ -396,6 +397,13 @@ std::ostream& operator<<(std::ostream& out, const Network::Bandwidth& data)
     if (data.bitsPerSecond < MB_i) return out << data.bitsPerSecond / 1000 << " Kbps";
     return out << std::fixed << std::setprecision(3) << data.bitsPerSecond / MB_f << " Mbps";
 }
+
+std::ostream& operator<<(std::ostream& out, const Network::BandwidthShort& data)
+{
+    if (data.bitsPerSecond < MB_i) return out << data.bitsPerSecond / 1000 << "Kb";
+    return out << std::fixed << std::setprecision(2) << data.bitsPerSecond / MB_f << "Mb";
+}
+
 
 struct Health
 {
@@ -607,7 +615,7 @@ int main(int argc, char** argv)
                 if (bps > 0) reportDetail << " - " << Network::Bandwidth { bps };
                 reportDetail << " \n";
                 if (isSelectedInterface)
-                    reportStd << std::setw(6) << Network::Bandwidth { bps } << " " << icon << " \n";
+                    reportStd << std::setw(4) << Network::BandwidthShort { bps } << icon << " ";
             };
 
             reportDetail << " " << itn->first << ": ";
@@ -656,7 +664,7 @@ int main(int argc, char** argv)
                                  << "  (" << 100.0 * user_hz__sinceBoot / cpuTotalSinceBoot << "%) \n";
                 };
 
-                reportStd << std::setw(6) << std::fixed << std::setprecision(1) << usagePercent << "%";
+                reportStd << std::setw(4) << std::fixed << std::setprecision(0) << usagePercent << "%";
 
                 reportDetail << " CPU \u2699 " << std::fixed << std::setprecision(2) << usagePercent << "% \u2248 ";
 
@@ -690,7 +698,7 @@ int main(int argc, char** argv)
 
     if (new_Memory) // RAM report
     {
-        if (!new_Health && new_CPU) reportStd << " " << new_Memory->ram.available/1024 << "M\n";
+        // kamil if (!new_Health && new_CPU) reportStd << " " << new_Memory->ram.available/1024 << "M\n";
 
         reportDetail << " Memory " << new_Memory->ram.total/1024 << " MiB:\n"
             << Padded<uint64_t> { 1000000, new_Memory->ram.available/1024 } << " MiB available \n"
@@ -765,7 +773,7 @@ int main(int argc, char** argv)
             its->second.avg = (prevTotal + itt.second.tempMilliCelsius) / its->second.count;
         }
 
-        if (maxAbsTemp >= 0) reportStd << std::setw(4) << maxAbsTemp / 1000 << "ºC\n";
+        // kamil if (maxAbsTemp >= 0) reportStd << std::setw(4) << maxAbsTemp / 1000 << "ºC\n";
 
         if (!statByCategory.empty()) reportDetail << " Temperature: \n";
 
